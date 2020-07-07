@@ -1,0 +1,9 @@
+---
+- name: restart bind9-daemon
+  systemd:
+    name: bind9
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+  become: yes
+  ignore_errors: yes

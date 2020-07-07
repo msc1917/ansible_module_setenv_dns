@@ -1,0 +1,29 @@
+{{ ansible_managed }}
+
+Mail-Server:
+{% for host in dns_mail_server %}
+{{ host['hostname'] }}, {{ host['priority']}}
+{% endfor %}
+
+Hostname:
+{% for host in dhcp_config %}
+{{  host['fqhn_domain'] }}, {{ host['ip_address'] }}
+{% endfor %}
+
+Cluster:
+{% for host in dns_cluster_config  %}
+{%  for forward_host in host['forwarded']  %}
+{%   for ip_host in dhcp_config  %}
+{%    if ip_host['fqhn_domain'] == forward_host %}
+{{     "%-30s" % host['fqhn_domain'] | regex_replace("\." + network['domain'] + "$", "") }}  A       {{ ip_host['ip_address'] }}
+{%    endif %}
+{%   endfor %}
+{%  endfor %}
+{% endfor %}
+
+CNAME:
+{% for host in dns_cname_config %}
+{%  for fwd_host in host['forwarded'] %}
+{{   host['fqhn_domain'].rstrip(".").ljust(30) }}, CNAME={{ fwd_host.rstrip(".") }}
+{%  endfor %}
+{% endfor %}

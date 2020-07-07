@@ -1,0 +1,36 @@
+---
+- name: Generiere Domain-Liste
+  template:
+    src: "domain.list.j2"
+    dest: "{{ inventory_dir }}/dynamic_vars/files/config/dns/domain.list"
+    mode: '0644'
+  run_once: true
+  delegate_to: localhost
+  become: no
+  register: domainfile
+
+- name: Generiere domain.zone-Files
+  template:
+    src: "domain.zone.j2"
+    dest: "{{ inventory_dir }}/dynamic_vars/files/config/dns/zone-file/{{ item.domain }}.zone"
+    mode: '0644'
+  run_once: true
+  delegate_to: localhost
+  become: no
+  with_items:
+    - "{{ domain_files }}"
+  when:
+    - domainfile.changed
+
+- name: Generiere Reverse-Domain.zone-Files ([...].in-addr.arpa.zone)
+  template:
+    src: "in-addr.arpa.zone.j2"
+    dest: "{{ inventory_dir }}/dynamic_vars/files/config/dns/zone-file/{{ item }}.in-addr.arpa.zone"
+    mode: '0644'
+  run_once: true
+  delegate_to: localhost
+  become: no
+  with_items: 
+    - "{{ reverse_domain_files }}"
+  when:
+    - domainfile.changed

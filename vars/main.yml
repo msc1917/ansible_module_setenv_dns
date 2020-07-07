@@ -1,0 +1,16 @@
+---
+domain_files:
+  - domain: "{{ network.domain }}"
+    A:      "{{ network.domain_ip }}"
+  - domain: "lan.{{ network.domain }}"
+    CNAME:  "gateway.lan.{{ network.domain }}"
+  - domain: "wlan.{{ network.domain }}"
+    CNAME:  "wlan.lan.{{ network.domain }}"
+  - domain: "kube.{{ network.domain }}"
+    CNAME:  "docker01.kube.{{ network.domain }}"
+  - domain: "net.{{ network.domain }}"
+    CNAME:  "gateway.net.{{ network.domain }}"
+
+reverse_domain_files:
+  - 96.168.192
+  - 97.168.192

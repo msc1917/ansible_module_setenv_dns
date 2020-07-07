@@ -1,0 +1,22 @@
+;{{ ansible_managed }}
+{% set file_address = item.split('.') %}
+$ORIGIN .
+$TTL 86400	                    ; 1 day
+{{ item }}.in-addr.arpa	IN SOA	ns1.{{ network.domain }}. root.{{ network.domain }}. (
+                                {{ lookup('pipe','date +%s') }} ; serial
+                                300            ; refresh (5 minutes)
+                                60             ; retry (1 minute)
+                                604800         ; expire (1 week)
+                                3600           ; minimum (1 hour)
+                                )
+                        NS      ns1.{{ network.domain }}.
+                        NS      ns2.{{ network.domain }}.
+                        A       255.255.255.0
+                        PTR     {{ network.domain }}.
+$ORIGIN {{ item }}.in-addr.arpa.
+{% for host in dhcp_config %}
+{% set host_address = host["ip_address"].split('.') %}
+{% if file_address[0] == host_address[2] and file_address[1] == host_address[1] and file_address[2] == host_address[0] %}
+{{ "%-6s" % host_address[3] }}  PTR     {{ host["fqhn_domain"] }}
+{% endif %}
+{% endfor %}

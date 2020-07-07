@@ -1,0 +1,80 @@
+;{{ ansible_managed }}
+{% set dom_file = namespace(found=false) %}
+$ORIGIN .
+$TTL 86400	                    ; 1 day
+{{ "%-30s" % item['domain'] }}  IN SOA  ns1.{{ network.domain }}. root.{{ item['domain'] }}. (
+                                {{ lookup('pipe','date +%s') }} ; serial
+                                300            ; refresh (5 minutes)
+                                60             ; retry (1 minute)
+                                604800         ; expire (1 week)
+                                3600           ; minimum (1 hour)
+                                )
+
+; main domain name servers
+                        NS      ns1.{{ network.domain }}.
+                        NS      ns2.{{ network.domain }}.
+
+; mail servers for main domain
+{% for host in dns_mail_server %}
+                        MX      {{ host['priority'].ljust(3) }} {{ host['hostname'] }}.
+{% endfor %}
+
+$ORIGIN {{ item['domain'] }}.
+{% for host in dhcp_config  %}
+{%  set dom_file.found = true %}
+{%  for domain in domain_files %}
+{%   if not ('.' + item['domain']) | regex_search('\.' + domain['domain'] + '$' | string) %}
+{%    if host['fqhn_domain'] | regex_search('\.' + domain['domain'] + '$') %}
+{%     set dom_file.found = false %}
+{%    endif %}
+{%   endif %}
+{%  endfor %}
+{%  if dom_file.found and (host['fqhn_domain'] | regex_search('\.' + item['domain'] + '$')) %}
+{{   "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  A       {{ host['ip_address'] }}
+{%  endif %}
+{% endfor %}
+
+{% for host in dns_cluster_config  %}
+{%  set dom_file.found = true %}
+{%  for domain in domain_files %}
+{%   if not ('.' + item['domain']) | regex_search('\.' + domain['domain'] + '$' | string) %}
+{%    if host['fqhn_domain'] | regex_search('\.' + domain['domain'] + '$') %}
+{%     set dom_file.found = false %}
+{%    endif %}
+{%   endif %}
+{%  endfor %}
+{%  if dom_file.found and (host['fqhn_domain'] | regex_search('\.' + item['domain'] + '$')) %}
+{%   for forward_host in host['forwarded']  %}
+{%    for ip_host in dhcp_config  %}
+{%     if ip_host['fqhn_domain'] == forward_host %}
+{{      "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  A       {{ ip_host['ip_address'] }}
+{%     endif %}
+{%    endfor %}
+{%   endfor %}
+{%  endif %}
+{% endfor %}
+
+{% for host in dns_cname_config %}
+{%  set dom_file.found = true %}
+{%  for domain in domain_files %}
+{%   if not ('.' + item['domain']) | regex_search('\.' + domain['domain'] + '$' | string) %}
+{%    if host['fqhn_domain'] | regex_search('\.' + domain['domain'] + '$') %}
+{%    set dom_file.found = false %}
+{%    endif %}
+{%   endif %}
+{%  endfor %}
+{%  if dom_file.found and (host['fqhn_domain'] | regex_search('\.' + item['domain'] + '$')) %}
+{%   for domain in domain_files %}
+{%    if not ('.' + item['domain']) | regex_search('\.' + domain['domain'] + '$' | string) %}
+{%     if host['forwarded'] | regex_search('\.' + domain['domain'] + '$') %}
+{%      set dom_file.found = false %}
+{%     endif %}
+{%    endif %}
+{%   endfor %}
+{%   if dom_file.found and (host['forwarded'] | regex_search('\.' + item['domain'] + '$')) %}
+{{    "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  CNAME   {{ host['forwarded'] | regex_replace("\." + item['domain'] + "$", "") }}
+{%   else %}
+{{    "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  CNAME   {{ host['forwarded'].rstrip(".") }}.
+{%   endif %}
+{%  endif %}
+{% endfor %}
