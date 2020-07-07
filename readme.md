@@ -13,3 +13,6 @@ Richtet die Software für folgende Services ein:
 * **files:** Files, welche von der Rolle benötigt werden könnten
 * **handlers:** Ansible-Handler-Definitionen
 * **meta:** Meta-Daten für die Rolle
+
+## Anmerkungen:
+* Das kopieren des Zone-Files wird aufgrund des Syncs der Konfiguration immer getriggert... Ich sollte hierfür noch eine Lösung finden.

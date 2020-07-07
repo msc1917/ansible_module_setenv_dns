@@ -23,7 +23,5 @@ Cluster:
 
 CNAME:
 {% for host in dns_cname_config %}
-{%  for fwd_host in host['forwarded'] %}
-{{   host['fqhn_domain'].rstrip(".").ljust(30) }}, CNAME={{ fwd_host.rstrip(".") }}
-{%  endfor %}
+{{  host['fqhn_domain'].rstrip(".").ljust(30) }}, CNAME={{ host['forwarded'].rstrip(".") }}
 {% endfor %}
