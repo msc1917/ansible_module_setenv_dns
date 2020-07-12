@@ -1,1 +1,3 @@
 ---
+dependencies:
+  - role: setenv_local
