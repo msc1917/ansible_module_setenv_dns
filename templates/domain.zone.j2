@@ -30,7 +30,7 @@ $ORIGIN {{ item['domain'] }}.
 {%   endif %}
 {%  endfor %}
 {%  if dom_file.found and (host['fqhn_domain'] | regex_search('\.' + item['domain'] + '$')) %}
-{{   "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  A       {{ host['ip_address'] }}
+{{   "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  IN A       {{ host['ip_address'] }}
 {%  endif %}
 {% endfor %}
 
@@ -47,7 +47,7 @@ $ORIGIN {{ item['domain'] }}.
 {%   for forward_host in host['forwarded']  %}
 {%    for ip_host in dhcp_config  %}
 {%     if ip_host['fqhn_domain'] == forward_host %}
-{{      "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  A       {{ ip_host['ip_address'] }}
+{{      "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  IN A       {{ ip_host['ip_address'] }}
 {%     endif %}
 {%    endfor %}
 {%   endfor %}
@@ -72,9 +72,9 @@ $ORIGIN {{ item['domain'] }}.
 {%    endif %}
 {%   endfor %}
 {%   if dom_file.found and (host['forwarded'] | regex_search('\.' + item['domain'] + '$')) %}
-{{    "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  CNAME   {{ host['forwarded'] | regex_replace("\." + item['domain'] + "$", "") }}
+{{    "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}     CNAME   {{ host['forwarded'] | regex_replace("\." + item['domain'] + "$", "") }}
 {%   else %}
-{{    "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  CNAME   {{ host['forwarded'].rstrip(".") }}.
+{{    "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}     CNAME   {{ host['forwarded'].rstrip(".") }}.
 {%   endif %}
 {%  endif %}
 {% endfor %}
