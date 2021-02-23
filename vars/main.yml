@@ -14,3 +14,4 @@ domain_files:
 reverse_domain_files:
   - 96.168.192
   - 97.168.192
+  - 98.168.192
