@@ -20,6 +20,13 @@ $TTL 86400	                    ; 1 day
 {% endfor %}
 
 $ORIGIN {{ item['domain'] }}.
+{% if item['domain'] == network.domain %}
+{{ "%-30s" %  network.domain }}. IN A       {{ network['external_ip'] }}
+www                             IN A       {{ network['external_ip'] }}
+blog                            IN A       {{ network['external_ip'] }}
+ftp                             IN A       {{ network['external_ip'] }}
+wpapi                           IN A       {{ network['external_ip'] }}
+{%  endif %}
 {% for host in dhcp_config  %}
 {%  set dom_file.found = true %}
 {%  for domain in domain_files %}
