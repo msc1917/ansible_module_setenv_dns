@@ -79,10 +79,10 @@ wpapi                           IN A       {{ network['external_ip'] }}
 {%     endif %}
 {%    endif %}
 {%   endfor %}
-{%   if dom_file.found and (host['forwarded'] | regex_search('\.' + item['domain'] + '$')) %}
-{{    "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  IN CNAME   {{ host['forwarded'] | regex_replace("\." + item['domain'] + "$", "") }}
-{%   else %}
+{# {%   if dom_file.found and (host['forwarded'] | regex_search('\.' + item['domain'] + '$')) %} #}
+{# {{    "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  IN CNAME   {{ host['forwarded'] | regex_replace("\." + item['domain'] + "$", "") }} #}
+{# {%   else %} #}
 {{    "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  IN CNAME   {{ host['forwarded'].rstrip(".") }}.
-{%   endif %}
+{# {%   endif %} #}
 {%  endif %}
 {% endfor %}
