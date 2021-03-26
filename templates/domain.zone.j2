@@ -61,7 +61,6 @@ wpapi                           IN A       {{ network['external_ip'] }}
 {%   endfor %}
 {%  endif %}
 {% endfor %}
-
 {% for host in dns_cname_config %}
 {%  set dom_file.found = true %}
 {%  for domain in domain_files %}
