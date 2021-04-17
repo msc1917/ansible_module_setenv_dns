@@ -1,7 +1,7 @@
 ;{{ ansible_managed }}
 {% set dom_file = namespace(found=false) %}
 $ORIGIN .
-$TTL 86400	                    ; 1 day
+$TTL 86400                      ; 1 day
 {{ "%-30s" % item['domain'] }}  IN SOA  ns1.{{ network.domain }}. root.{{ item['domain'] }}. (
                                 {{ lookup('pipe','date +%s') }} ; serial
                                 300            ; refresh (5 minutes)
@@ -20,13 +20,11 @@ $TTL 86400	                    ; 1 day
 {% endfor %}
 
 $ORIGIN {{ item['domain'] }}.
-{% if item['domain'] == network.domain %}
-{{ "%-30s" %  network.domain + '.' }} IN A       {{ network['external_ip'] }}
-www                             IN A       {{ network['external_ip'] }}
-ftp                             IN A       {{ network['external_ip'] }}
-ca                              IN A       {{ network['external_ip'] }}
-blog                            IN A       {{ network['external_ip'] }}
-wpapi                           IN A       {{ network['external_ip'] }}
+{% if item['domain'] == network['domain'] %}
+{{ "%-30s" %  (network['domain'] + '.') }}  IN A       {{ network['external_ip'] }}
+{%  for domain in network['external_domain'] %}
+{{ "%-30s" %  domain['domainname'] }}  IN A       {{ domain['ip_address'] | default(network['external_ip']) }}
+{%   endfor %}
 {%  endif %}
 {% for host in dhcp_config  %}
 {%  set dom_file.found = true %}
@@ -78,10 +76,6 @@ wpapi                           IN A       {{ network['external_ip'] }}
 {%     endif %}
 {%    endif %}
 {%   endfor %}
-{# {%   if dom_file.found and (host['forwarded'] | regex_search('\.' + item['domain'] + '$')) %} #}
-{# {{    "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  IN CNAME   {{ host['forwarded'] | regex_replace("\." + item['domain'] + "$", "") }} #}
-{# {%   else %} #}
 {{    "%-30s" % host['fqhn_domain'] | regex_replace("\." + item['domain'] + "$", "") }}  IN CNAME   {{ host['forwarded'].rstrip(".") }}.
-{# {%   endif %} #}
 {%  endif %}
 {% endfor %}

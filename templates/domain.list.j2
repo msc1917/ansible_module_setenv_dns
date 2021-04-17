@@ -5,6 +5,11 @@ Mail-Server:
 {{ host['hostname'] }}, {{ host['priority']}}
 {% endfor %}
 
+External Domains:
+{% for host in network['external_domain'] %}
+{{  host['domainname'] }}.{{network['domain']}}, {{ host['ip_address'] | default(network['external_ip']) }}
+{% endfor %}
+
 Hostname:
 {% for host in dhcp_config %}
 {{  host['fqhn_domain'] }}, {{ host['ip_address'] }}
